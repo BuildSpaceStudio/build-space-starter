@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Playfair_Display, Inter, Geist_Mono } from "next/font/google";
+import { Geist_Mono, Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
 
 const playfair = Playfair_Display({
@@ -30,7 +30,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${playfair.variable} ${inter.variable} ${geistMono.variable} font-sans antialiased`}>{children}</body>
+      <body
+        className={`${playfair.variable} ${inter.variable} ${geistMono.variable} font-sans antialiased`}
+      >
+        {children}
+      </body>
     </html>
   );
 }
