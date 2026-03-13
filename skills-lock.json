@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "skills": {
+    "buildspace-cli": {
+      "source": "buildspacestudio/skills",
+      "sourceType": "github",
+      "computedHash": "c1e00e9a67608b7ab30ac1ca47049ff833b36e1e32a0bb6985426245f7737bdc"
+    },
+    "buildspace-examples": {
+      "source": "buildspacestudio/skills",
+      "sourceType": "github",
+      "computedHash": "607a148fa56d3f15e4957970fb37126bf449a7bba5e0dd2c8b78a07d4099394f"
+    },
+    "buildspace-sdk": {
+      "source": "buildspacestudio/skills",
+      "sourceType": "github",
+      "computedHash": "64e65035ed855a89691d846fb3d8047dfb0cc6cf96f2eabdcb23031d8b8e225b"
+    }
+  }
+}
