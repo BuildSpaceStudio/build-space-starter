@@ -62,17 +62,21 @@ Copy `.env.example` to `.env.local` and fill in your keys from the BuildSpace da
 |------|---------|
 | `lib/buildspace.ts` | Server SDK singleton |
 | `lib/buildspace-client.ts` | Browser SDK singleton |
+| `lib/auth.ts` | Shared `getSession()` helper |
 | `app/api/auth/callback/route.ts` | OAuth callback handler |
 | `app/api/auth/session/route.ts` | Session validation |
 | `app/api/auth/logout/route.ts` | Logout + revocation |
-| `app/api/events/route.ts` | Server-side event tracking |
-| `app/api/storage/route.ts` | Storage operations |
-| `app/api/notifications/route.ts` | Email sending |
-| `app/examples/page.tsx` | Interactive SDK examples |
+
+### Skills
+
+- **SDK reference** — `.claude/skills/buildspace-sdk/SKILL.md` — how to call SDK methods (auth, events, storage, notifications), error handling, session forwarding
+- **Patterns & recipes** — `.claude/skills/buildspace-examples/SKILL.md` — preferred patterns for adding features: AuthProvider, route protection (proxy.ts), server actions (next-safe-action), event tracking, file storage, email notifications, protected API routes
+
+To add event tracking, storage, notifications, auth gating, server actions, or route protection, use the buildspace-examples skill.
 
 ### SDK documentation
 
-For full API reference, see `.claude/skills/buildspace-sdk.md` or fetch the latest from:
+For latest upstream docs, fetch:
 - https://docs.buildspace.studio/llms-full.txt
 - https://docs.buildspace.studio/docs
 
@@ -93,3 +97,4 @@ For full API reference, see `.claude/skills/buildspace-sdk.md` or fetch the late
 - Use `getServerClient()` for server-side SDK access, `getBrowserClient()` for client-side
 - Never expose `BUILDSPACE_SECRET_KEY` to the browser
 - Store session tokens in HTTP-only cookies, not localStorage
+- Use `getSession()` from `lib/auth.ts` for server-side session validation

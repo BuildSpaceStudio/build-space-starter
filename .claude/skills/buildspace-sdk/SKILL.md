@@ -182,12 +182,14 @@ try {
 |------|---------|
 | `lib/buildspace.ts` | Server SDK singleton |
 | `lib/buildspace-client.ts` | Browser SDK singleton |
-| `app/api/events/route.ts` | Server-side event tracking |
-| `app/api/storage/route.ts` | Storage operations |
-| `app/api/notifications/route.ts` | Email sending |
-| `app/examples/page.tsx` | Interactive SDK examples |
+| `lib/auth.ts` | Shared `getSession()` helper (cookie + SDK validation) |
+| `app/api/auth/callback/route.ts` | OAuth callback handler |
+| `app/api/auth/session/route.ts` | Session validation |
+| `app/api/auth/logout/route.ts` | Logout + revocation |
 
 ## Additional resources
+
+For preferred patterns and recipes (AuthProvider, route protection, server actions, event tracking, storage, notifications), see the [buildspace-examples skill](../buildspace-examples/SKILL.md).
 
 For complete method signatures, configuration options, and client vs server availability, see [api-reference.md](api-reference.md).
 

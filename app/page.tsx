@@ -19,7 +19,7 @@ export default function Home() {
           <code className="rounded bg-slate-200 px-1.5 py-0.5 font-mono text-sm text-sky-600 dark:bg-slate-800 dark:text-sky-300">
             @buildspacestudio/sdk
           </code>{" "}
-          with working examples for authentication, event tracking, storage, and notifications.
+          pre-configured with authentication and everything you need to start building.
         </p>
 
         <div className="mt-10 grid gap-4 sm:grid-cols-2">
@@ -91,12 +91,6 @@ export default function Home() {
         </div>
 
         <div className="mt-10 flex flex-wrap items-center gap-4">
-          <a
-            href="/examples"
-            className="inline-block rounded-lg bg-sky-600 px-5 py-2.5 font-sans text-sm font-medium text-white hover:bg-sky-500"
-          >
-            View live examples &rarr;
-          </a>
           <a
             href="https://creator.buildspace.studio"
             target="_blank"
