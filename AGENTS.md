@@ -71,8 +71,9 @@ Copy `.env.example` to `.env.local` and fill in your keys from the BuildSpace da
 
 - **SDK reference** — `.claude/skills/buildspace-sdk/SKILL.md` — how to call SDK methods (auth, events, storage, notifications), error handling, session forwarding
 - **Patterns & recipes** — `.claude/skills/buildspace-examples/SKILL.md` — preferred patterns for adding features: AuthProvider, route protection (proxy.ts), server actions (next-safe-action), event tracking, file storage, email notifications, protected API routes
+- **CLI reference** — `.claude/skills/buildspace-cli/SKILL.md` — deploying apps, managing env vars, authentication, initializing projects
 
-To add event tracking, storage, notifications, auth gating, server actions, or route protection, use the buildspace-examples skill.
+To add event tracking, storage, notifications, auth gating, server actions, or route protection, use the buildspace-examples skill. For deployment, env var management, or CLI usage, use the buildspace-cli skill.
 
 ### SDK documentation
 
