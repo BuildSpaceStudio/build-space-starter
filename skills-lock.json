@@ -9,7 +9,7 @@
     "buildspace-examples": {
       "source": "buildspacestudio/skills",
       "sourceType": "github",
-      "computedHash": "607a148fa56d3f15e4957970fb37126bf449a7bba5e0dd2c8b78a07d4099394f"
+      "computedHash": "78230ad5e44fd14425a05c73f8dbf4a52538f7ef45ada0d7550013ee0f280c27"
     },
     "buildspace-sdk": {
       "source": "buildspacestudio/skills",

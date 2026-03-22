@@ -67,19 +67,22 @@ Copy `.env.example` to `.env.local` and fill in your keys from the BuildSpace da
 | `app/api/auth/session/route.ts` | Session validation |
 | `app/api/auth/logout/route.ts` | Logout + revocation |
 
-### Skills
+## BuildSpace documentation
 
-- **SDK reference** — `.claude/skills/buildspace-sdk/SKILL.md` — how to call SDK methods (auth, events, storage, notifications), error handling, session forwarding
-- **Patterns & recipes** — `.claude/skills/buildspace-examples/SKILL.md` — preferred patterns for adding features: AuthProvider, route protection (proxy.ts), server actions (next-safe-action), event tracking, file storage, email notifications, protected API routes
-- **CLI reference** — `.claude/skills/buildspace-cli/SKILL.md` — deploying apps, managing env vars, authentication, initializing projects
+- [docs.buildspace.studio](https://docs.buildspace.studio/docs) — product and API documentation for the platform and SDK
+- [llms-full.txt](https://docs.buildspace.studio/llms-full.txt) — full documentation export for assistants and tooling
 
-To add event tracking, storage, notifications, auth gating, server actions, or route protection, use the buildspace-examples skill. For deployment, env var management, or CLI usage, use the buildspace-cli skill.
+## Installed agent skills
 
-### SDK documentation
+BuildSpace skills are vendored in this repo under `.agents/skills/`; installed versions are listed in `skills-lock.json`. Use them when setting up or extending the app (env, auth, database, deploy, and feature patterns).
 
-For latest upstream docs, fetch:
-- https://docs.buildspace.studio/llms-full.txt
-- https://docs.buildspace.studio/docs
+| Skill | Path | Use for |
+|-------|------|---------|
+| **buildspace-sdk** | `.agents/skills/buildspace-sdk/SKILL.md` | SDK methods (auth, events, storage, notifications, database), env vars, error handling, session forwarding |
+| **buildspace-examples** | `.agents/skills/buildspace-examples/SKILL.md` | Next.js recipes: AuthProvider, route protection (`proxy.ts`), server actions, events, storage, email, protected APIs |
+| **buildspace-cli** | `.agents/skills/buildspace-cli/SKILL.md` | CLI: `buildspace auth`, `deploy`, `env`, init |
+
+Prefer **buildspace-examples** for UI, routing, and app wiring; **buildspace-sdk** for API details; **buildspace-cli** for deploy and environment management.
 
 ## Feature Development Workflow
 
@@ -91,6 +94,7 @@ For latest upstream docs, fetch:
 
 ## Guidelines
 
+- For BuildSpace setup, SDK usage, and deploy workflows, use the official docs (above) and the skills under `.agents/skills/`
 - Keep changes small and incremental
 - App slug is auto-detected from git remote origin
 - All deploys go to dev environment by default
