@@ -11,7 +11,7 @@
     "format": "biome format --write ."
   },
   "dependencies": {
-    "@buildspacestudio/sdk": "^0.1.2",
+    "@buildspacestudio/sdk": "latest",
     "next": "16.2.1",
     "next-themes": "^0.4.6",
     "react": "19.2.4",
