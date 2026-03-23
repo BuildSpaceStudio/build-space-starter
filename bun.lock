@@ -46,7 +46,7 @@
 
     "@biomejs/cli-win32-x64": ["@biomejs/cli-win32-x64@2.4.8", "", { "os": "win32", "cpu": "x64" }, "sha512-vAn7iXDoUbqFXqVocuq1sMYAd33p8+mmurqJkWl6CtIhobd/O6moe4rY5AJvzbunn/qZCdiDVcveqtkFh1e7Hg=="],
 
-    "@buildspacestudio/sdk": ["@buildspacestudio/sdk@0.1.2", "", {}, "sha512-R4FkMhO5abxzIMEdqHbRs/+Ephkybdu5uAlH+U/cUmDsO9cEdiCyIlXjgiyM//XAUpJoNSoc3YxIFlLzDye4yQ=="],
+    "@buildspacestudio/sdk": ["@buildspacestudio/sdk@0.2.1", "", {}, "sha512-TPbt6dxmMyOlSafdTYYj5v368Pz7b5JAz6FgworInB9F0V4jrhSaNbXv3z6Y4sWfrLgfhWeWvwIbImFb5anpvg=="],
 
     "@emnapi/runtime": ["@emnapi/runtime@1.8.1", "", { "dependencies": { "tslib": "^2.4.0" } }, "sha512-mehfKSMWjjNol8659Z8KxEMrdSJDDot5SXMq00dM8BN4o+CLNXQ0xH2V7EchNHV4RmbZLmmPdEaXZc5H2FXmDg=="],
 
