@@ -21,6 +21,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.8",
+    "@buildspacestudio/cli": "^0.4.1",
     "@tailwindcss/postcss": "^4.2.2",
     "@types/node": "^25.4.0",
     "@types/react": "^19",

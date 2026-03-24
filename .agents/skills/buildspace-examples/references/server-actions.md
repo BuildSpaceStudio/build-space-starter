@@ -5,7 +5,8 @@
 Install dependencies:
 
 ```bash
-bun add next-safe-action zod
+npm install next-safe-action zod
+# or: pnpm add next-safe-action zod | bun add next-safe-action zod
 ```
 
 Create `lib/safe-action.ts`:

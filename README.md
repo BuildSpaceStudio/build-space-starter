@@ -5,7 +5,7 @@ Canonical Next.js starter template for BuildSpace apps. Ships with authenticatio
 ## Prerequisites
 
 - Node.js 24+ (see `.nvmrc`)
-- [Bun](https://bun.sh) package manager
+- A package manager: **npm** (included with Node), [pnpm](https://pnpm.io), or [Bun](https://bun.sh)
 
 ## Quick start
 
@@ -15,8 +15,9 @@ cp .env.example .env.local
 #   BUILDSPACE_SECRET_KEY=bs_sec_...
 #   NEXT_PUBLIC_BUILDSPACE_PUBLISHABLE_KEY=bs_pub_...
 
-bun install
-bun dev
+npm install && npm run dev
+# or: pnpm install && pnpm dev
+# or: bun install && bun dev
 ```
 
 Open http://localhost:3000.
@@ -39,7 +40,8 @@ If you're using an AI coding assistant, ask it to add these features. The projec
 ## Build
 
 ```bash
-bun run build
+npm run build
+# or: pnpm run build | bun run build
 ```
 
 ## Deploy

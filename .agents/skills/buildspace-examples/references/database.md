@@ -7,8 +7,10 @@ Every Buildspace app gets a managed Turso (libSQL) database — one per environm
 Install dependencies:
 
 ```bash
-bun add @libsql/client drizzle-orm
-bun add -D drizzle-kit
+npm install @libsql/client drizzle-orm
+npm install -D drizzle-kit
+# or: pnpm add @libsql/client drizzle-orm && pnpm add -D drizzle-kit
+# or: bun add @libsql/client drizzle-orm && bun add -D drizzle-kit
 ```
 
 Create `lib/db.ts`:

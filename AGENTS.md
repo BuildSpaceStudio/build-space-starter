@@ -6,10 +6,14 @@ BuildSpace starter app using Next.js App Router + TypeScript + Tailwind CSS + Bu
 
 ## Commands
 
-- `bun install` - Install dependencies
-- `bun dev` - Start dev server (http://localhost:3000)
-- `bun run build` - Production build (run before deploying)
-- `bun run lint` - Run Biome linter
+Use **npm**, **pnpm**, or **bun** — scripts are defined in `package.json`.
+
+| Task | npm | pnpm | bun |
+|------|-----|------|-----|
+| Install dependencies | `npm install` | `pnpm install` | `bun install` |
+| Dev server (http://localhost:3000) | `npm run dev` | `pnpm dev` | `bun dev` |
+| Production build | `npm run build` | `pnpm run build` | `bun run build` |
+| Linter | `npm run lint` | `pnpm lint` | `bun run lint` |
 
 ## BuildSpace CLI
 
@@ -87,7 +91,7 @@ Prefer **buildspace-examples** for UI, routing, and app wiring; **buildspace-sdk
 ## Feature Development Workflow
 
 1. **Implement** the feature or fix
-2. **Verify**: `bun run build` must pass
+2. **Verify**: production build must pass (`npm run build`, `pnpm run build`, or `bun run build`)
 3. **Commit**: Use conventional commit format (`feat:`, `fix:`, `refactor:`, `chore:`)
 4. **Deploy**: `buildspace deploy` pushes to origin/main and triggers deployment
 5. **Monitor**: `buildspace deploy status` to check deployment progress
