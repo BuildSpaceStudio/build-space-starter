@@ -42,3 +42,9 @@ yarn-error.log*
 next-env.d.ts
 
 .omc/
+
+# local sqlite database
+local.db
+local.db-journal
+*.db
+*.db-journal

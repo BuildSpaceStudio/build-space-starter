@@ -10,23 +10,32 @@
     "lint:fix": "biome check --write .",
     "format": "biome format --write .",
     "deploy": "buildspace deploy",
-    "deploy:status": "buildspace deploy status"
+    "deploy:status": "buildspace deploy status",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:studio": "drizzle-kit studio",
+    "db:seed": "tsx lib/db/seed.ts"
   },
   "dependencies": {
     "@buildspacestudio/sdk": "latest",
-    "next": "16.2.1",
+    "@libsql/client": "^0.17.3",
+    "drizzle-orm": "^0.45.2",
+    "next": "16.2.6",
     "next-themes": "^0.4.6",
-    "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react": "19.2.6",
+    "react-dom": "19.2.6",
+    "server-only": "^0.0.1"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.8",
-    "@buildspacestudio/cli": "^0.4.1",
+    "@buildspacestudio/cli": "^0.6.0",
     "@tailwindcss/postcss": "^4.2.2",
     "@types/node": "^25.4.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "drizzle-kit": "^0.31.10",
     "tailwindcss": "^4.2.2",
+    "tsx": "^4.19.2",
     "typescript": "^5"
   },
   "ignoreScripts": [
