@@ -6,6 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "typecheck": "tsc --noEmit",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "format": "biome format --write .",
@@ -27,16 +28,16 @@
     "server-only": "^0.0.1"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.4.8",
+    "@biomejs/biome": "^2.4.15",
     "@buildspacestudio/cli": "^0.6.0",
-    "@tailwindcss/postcss": "^4.2.2",
-    "@types/node": "^25.4.0",
+    "@tailwindcss/postcss": "^4.3.0",
+    "@types/node": "^25.9.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "drizzle-kit": "^0.31.10",
-    "tailwindcss": "^4.2.2",
-    "tsx": "^4.19.2",
-    "typescript": "^5"
+    "tailwindcss": "^4.3.0",
+    "tsx": "^4.22.2",
+    "typescript": "^6.0.3"
   },
   "ignoreScripts": [
     "sharp",
