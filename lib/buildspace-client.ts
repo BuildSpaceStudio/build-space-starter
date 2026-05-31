@@ -10,9 +10,7 @@ let instance: ReturnType<typeof createClient> | null = null;
 export function getBrowserClient() {
   if (instance) return instance;
   const key = process.env.NEXT_PUBLIC_BUILDSPACE_PUBLISHABLE_KEY;
-  if (!key) {
-    throw new Error("Missing NEXT_PUBLIC_BUILDSPACE_PUBLISHABLE_KEY environment variable");
-  }
+  if (!key) throw new Error("Missing NEXT_PUBLIC_BUILDSPACE_PUBLISHABLE_KEY");
   instance = createClient(key);
   return instance;
 }

@@ -21,6 +21,7 @@
     "actions": {
       "source": {
         "organizeImports": {
+          "options": {},
           "level": "on"
         }
       }
@@ -48,11 +49,5 @@
       "tailwindDirectives": true
     }
   },
-  "javascript": {
-    "formatter": {
-      "quoteStyle": "double",
-      "semicolons": "always",
-      "trailingCommas": "all"
-    }
-  }
+  "javascript": {}
 }

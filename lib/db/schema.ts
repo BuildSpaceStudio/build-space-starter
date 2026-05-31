@@ -32,3 +32,18 @@ export const users = sqliteTable(
 
 export type UserRecord = typeof users.$inferSelect;
 export type NewUserRecord = typeof users.$inferInsert;
+
+export const todos = sqliteTable("todos", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  userId: text("user_id").notNull(),
+  text: text("text").notNull(),
+  completed: integer("completed", { mode: "boolean" }).notNull().default(false),
+  createdAt: text("created_at")
+    .notNull()
+    .$defaultFn(() => new Date().toISOString()),
+});
+
+export type TodoRecord = typeof todos.$inferSelect;
+export type NewTodoRecord = typeof todos.$inferInsert;

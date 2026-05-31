@@ -9,9 +9,7 @@ async function main() {
     return;
   }
 
-  console.log(
-    "Seed skipped: starter relies on real auth sign-ins to create users.",
-  );
+  console.log("Seed skipped: starter relies on real auth sign-ins to create users.");
 }
 
 main().catch((error) => {
