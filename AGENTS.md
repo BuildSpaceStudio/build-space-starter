@@ -27,14 +27,14 @@ Use `bun` — scripts are defined in `package.json`.
 | File | Purpose |
 |------|---------|
 | `lib/env.ts` | Typed env validation via `@t3-oss/env-nextjs` |
-| `lib/safe-action.ts` | `action` (public) and `authAction` (requires session) |
+| `lib/safe-action.ts` | `actionClient` (public) and `authActionClient` (requires session) |
 | `lib/utils.ts` | `cn()` helper for conditional Tailwind classes |
-| `middleware.ts` | Fast cookie-presence check protecting `/dashboard/*` |
+| `proxy.ts` | Fast cookie-presence check protecting `/dashboard/*` |
 | `components/ui/` | Button, Input, Card, Checkbox (uses `radix-ui` mono package) |
 
 ## Patterns
 
-`app/dashboard/todos/` is the vertical slice example: schema → `authAction` + zod → `revalidatePath` → server component with `getSession()` guard → client components with `useAction` + `toast`. Copy this pattern for new features.
+`app/dashboard/todos/` is the vertical slice example: schema → `authActionClient` + zod → `revalidatePath` → server component with `getSession()` guard → client components with `useAction` + `toast`. Copy this pattern for new features.
 
 ## Next.js 16 gotchas
 
