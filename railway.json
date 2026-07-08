@@ -5,6 +5,7 @@
   },
   "deploy": {
     "startCommand": "bun run start",
+    "preDeployCommand": "bun run db:migrate",
     "healthcheckPath": "/api/health",
     "healthcheckTimeout": 100,
     "restartPolicyType": "ON_FAILURE",

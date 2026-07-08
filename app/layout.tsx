@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import { Geist_Mono, Inter, Playfair_Display } from "next/font/google";
-import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "sonner";
+import { Analytics } from "@/components/analytics";
+import { AuthProvider } from "@/components/auth-provider";
+import { ThemeProvider } from "@/components/theme-provider";
+import { getSession } from "@/lib/auth";
 import "./globals.css";
 
 const playfair = Playfair_Display({
@@ -25,19 +28,24 @@ export const metadata: Metadata = {
   description: "The canonical starter for new BuildSpace apps",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await getSession();
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body
         className={`${playfair.variable} ${inter.variable} ${geistMono.variable} font-sans antialiased`}
       >
         <ThemeProvider>
-          {children}
-          <Toaster richColors closeButton />
+          <AuthProvider initialUser={session?.user ?? null}>
+            {children}
+            <Analytics />
+            <Toaster richColors closeButton />
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

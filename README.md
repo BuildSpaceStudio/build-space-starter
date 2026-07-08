@@ -1,6 +1,9 @@
 # BuildSpace Starter
 
-Canonical Next.js starter template for BuildSpace apps. Ships with authentication, the BuildSpace SDK, and light/dark mode — nothing else. Add features as you need them.
+Canonical Next.js starter template for BuildSpace apps. Every platform capability — auth, database, events, storage, email, and billing — ships with one small working example, organized as deletable vertical slices. Extend the slices you need; delete the rest.
+
+> [!NOTE]
+> This repository is a read-only mirror, automatically synced from the BuildSpace monorepo. Issues and discussions are welcome here, but pull requests can't be merged directly — direct commits are overwritten by the next sync.
 
 ## Prerequisites
 
@@ -15,27 +18,38 @@ cp .env.example .env.local
 #   BUILDSPACE_SECRET_KEY=bs_sec_...
 #   NEXT_PUBLIC_BUILDSPACE_PUBLISHABLE_KEY=bs_pub_...
 
-npm install && npm run dev
-# or: pnpm install && pnpm dev
-# or: bun install && bun dev
+npm install && npm run db:migrate && npm run db:seed && npm run dev
+# or: pnpm install && pnpm db:migrate && pnpm db:seed && pnpm dev
+# or: bun install && bun db:migrate && bun db:seed && bun dev
 ```
 
-Open http://localhost:3000.
+Open http://localhost:3000. The migrate + seed steps set up a local SQLite file (`local.db`) with sample data — no remote database needed for local work.
 
 ## What's included
 
-| Feature             | Files                                                                               |
-| ------------------- | ----------------------------------------------------------------------------------- |
-| **SDK singletons**  | `lib/buildspace.ts` (server), `lib/buildspace-client.ts` (browser)                  |
-| **Session helper**  | `lib/auth.ts` — shared `getSession()` for server-side auth checks                   |
-| **Auth routes**     | `app/api/auth/callback/`, `session/`, `logout/` — OAuth flow with HTTP-only cookies |
-| **Light/dark mode** | `components/theme-provider.tsx`, `components/theme-toggle.tsx`                      |
+| Feature | Where | What it demonstrates |
+|---------|-------|----------------------|
+| **App shell** | `components/site-header.tsx`, `app/dashboard/layout.tsx` | Auth-aware header with user menu, sidebar nav |
+| **Auth** | `components/auth-provider.tsx`, `lib/auth.ts`, `app/api/auth/*` | OAuth flow, HTTP-only cookies, `useAuth()`, session helpers |
+| **Local users** | `lib/db/users.ts`, `app/api/auth/callback/route.ts` | BuildSpace identity mirrored into your own `users` table; first-sign-in hook (signup event + welcome email) |
+| **Todos slice** | `app/dashboard/todos/` | The canonical vertical slice: schema → safe action → server component → toasts |
+| **Files slice** | `app/dashboard/files/` | Browser-direct uploads, server-signed downloads, path-ownership checks |
+| **Billing slice** | `app/dashboard/billing/`, `lib/billing.ts` | Stripe checkout, customer portal, entitlement gating, test-mode banner |
+| **Settings slice** | `app/dashboard/settings/` | Profile form (read-modify-write) + avatar upload |
+| **Admin slice** | `app/dashboard/admin/` | Role-gated page and actions (`adminActionClient`) |
+| **Analytics** | `lib/analytics.ts`, `components/analytics.tsx` | Server events that never break the app; batched client page views |
+| **Email** | `lib/email.ts` | Transactional email, one function per message type |
+| **Database** | `lib/db/`, `drizzle/` | Drizzle + Turso/libSQL with versioned migrations and a local file fallback |
+| **UI kit** | `components/ui/` | 15 shadcn-style primitives on the `radix-ui` mono package |
+| **Light/dark mode** | `components/theme-provider.tsx`, `components/theme-toggle.tsx` | Class-based theming with `next-themes` |
 
-## Available SDK features
+Every slice degrades gracefully when its backing service isn't configured — a fresh clone with only the two keys builds and runs.
 
-The BuildSpace SDK also provides **event tracking**, **file storage**, and **email notifications**. These aren't wired up in the starter — add them when your app needs them.
+Each slice is deletable: remove its folder, nav entry, and table. `AGENTS.md` has the exact removal steps.
 
-If you're using an AI coding assistant, ask it to add these features. The project includes skills (in `.claude/skills/`) with complete recipes for each one.
+## Building with AI
+
+The project ships agent skills (in `.claude/skills/` and `.agents/skills/`) whose recipes point at the real files in this repo. Ask your AI assistant to "add a feature" and it will follow `references/new-feature-playbook.md` — the same vertical-slice checklist the built-in examples use.
 
 ## Build
 
@@ -43,6 +57,8 @@ If you're using an AI coding assistant, ask it to add these features. The projec
 npm run build
 # or: pnpm run build | bun run build
 ```
+
+The build uses Next.js standalone output; `npm start` runs `node .next/standalone/server.js`.
 
 ## Deploy
 
@@ -54,11 +70,26 @@ buildspace deploy
 
 The repository is the source of truth for what gets deployed. Run `buildspace deploy status` to check progress.
 
+What happens on Railway (configured in `railway.json`):
+
+1. Railpack builds the app (`npm run build` → standalone output).
+2. **Pre-deploy**: `bun run db:migrate` applies any pending Drizzle migrations against the managed database — schema changes ship with the code, no manual step.
+3. The server starts and Railway health-checks `/api/health` (always fast-200; DB reachability is reported in the response body).
+
+Environment variables in deployed environments:
+
+- `BUILDSPACE_DB_URL` / `BUILDSPACE_DB_TOKEN` — **auto-injected** by BuildSpace when the app is created.
+- `BUILDSPACE_SECRET_KEY` / `NEXT_PUBLIC_BUILDSPACE_PUBLISHABLE_KEY` — from your BuildSpace dashboard.
+- `NEXT_PUBLIC_APP_URL` — optional; set it to your public URL for billing redirect links.
+
 ## Environment variables
 
-| Variable                                 | Where        | Description                                |
-| ---------------------------------------- | ------------ | ------------------------------------------ |
-| `BUILDSPACE_SECRET_KEY`                  | Server only  | `bs_sec_...` — never expose to the browser |
-| `NEXT_PUBLIC_BUILDSPACE_PUBLISHABLE_KEY` | Browser safe | `bs_pub_...` — used by the client SDK      |
+| Variable | Where | Description |
+|----------|-------|-------------|
+| `BUILDSPACE_SECRET_KEY` | Server only | `bs_sec_...` — never expose to the browser |
+| `NEXT_PUBLIC_BUILDSPACE_PUBLISHABLE_KEY` | Browser safe | `bs_pub_...` — used by the client SDK |
+| `BUILDSPACE_DB_URL` | Server only | libSQL/Turso URL; blank locally = `file:local.db` |
+| `BUILDSPACE_DB_TOKEN` | Server only | libSQL auth token; blank for the local file DB |
+| `NEXT_PUBLIC_APP_URL` | Browser safe | Optional absolute origin for billing redirects |
 
 Get your keys from the [BuildSpace Creator Dashboard](https://creator.buildspace.studio).

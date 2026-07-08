@@ -1,13 +1,13 @@
 "use client";
 
+import { Trash2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { toast } from "sonner";
-import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { cn } from "@/lib/utils";
 import type { TodoRecord } from "@/lib/db/schema";
-import { toggleTodo, deleteTodo } from "./actions";
+import { cn } from "@/lib/utils";
+import { deleteTodo, toggleTodo } from "./actions";
 
 export function TodoItem({ todo }: { todo: TodoRecord }) {
   const { execute: toggle } = useAction(toggleTodo, {
