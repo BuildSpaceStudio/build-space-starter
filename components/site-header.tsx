@@ -32,7 +32,7 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-6">
-        <Link href="/" className="font-display text-lg font-semibold tracking-tight">
+        <Link href="/" className="font-serif text-lg tracking-tight">
           BuildSpace Starter
         </Link>
 
