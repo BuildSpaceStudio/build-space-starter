@@ -1,74 +1,22 @@
 import "server-only";
+import type { BillingPrice, BillingProduct, BillingStatusResponse } from "@buildspacestudio/sdk";
 import { BuildspaceError } from "@buildspacestudio/sdk";
 import { getServerClient } from "@/lib/buildspace";
 
-// Billing helpers around the SDK's `bs.billing` namespace (added in
-// @buildspacestudio/sdk 0.4.0). The types below mirror the SDK's billing types;
-// once the installed SDK ships the namespace they can be replaced with direct
-// imports. Everything degrades gracefully: an older SDK or an app without
-// billing enabled resolves to the "unavailable"/"disabled" states instead of
-// crashing, so a fresh clone with only the two keys always renders.
+// Billing helpers around the SDK's `bs.billing` namespace. Everything degrades
+// gracefully: an app without billing enabled resolves to the
+// "unavailable"/"disabled" states instead of crashing, so a fresh clone with
+// only the two keys always renders.
 
-export interface BillingStatus {
-  enabled: boolean;
-  mode: "test" | "live" | null;
-  status: "disabled" | "setup_required" | "active" | "paused" | null;
-  testMode: boolean;
-}
+export type { BillingPrice, BillingProduct } from "@buildspacestudio/sdk";
 
-export interface BillingProduct {
-  active: boolean;
-  createdAt: string;
-  description: string | null;
-  id: string;
-  name: string;
-}
-
-export interface BillingPrice {
-  active: boolean;
-  amountCents: number | null;
-  createdAt: string;
-  currency: string;
-  id: string;
-  interval: string | null;
-  lookupKey: string | null;
-  productId: string;
-  productName: string;
-  type: "one_time" | "recurring" | "metered";
-}
+export type BillingStatus = BillingStatusResponse;
 
 export interface BillingSubscription {
   cancelAtPeriodEnd: boolean;
   currentPeriodEnd: string | null;
   id: string;
   status: string;
-}
-
-interface BillingNamespace {
-  getStatus(): Promise<BillingStatus>;
-  listProducts(): Promise<{ products: BillingProduct[] }>;
-  listPrices(): Promise<{ prices: BillingPrice[] }>;
-  createCheckout(opts: {
-    userId?: string;
-    priceId?: string;
-    lookupKey?: string;
-    quantity?: number;
-    successUrl: string;
-    cancelUrl: string;
-    metadata?: Record<string, string>;
-  }): Promise<{ url: string }>;
-  createPortalSession(opts: { userId?: string; returnUrl: string }): Promise<{ url: string }>;
-  getSubscription(opts?: {
-    userId?: string;
-  }): Promise<{ subscription: BillingSubscription | null }>;
-  getEntitlements(opts?: {
-    userId?: string;
-  }): Promise<{ active: boolean; subscription: BillingSubscription | null }>;
-}
-
-function getBillingNamespace(): BillingNamespace | null {
-  const bs = getServerClient() as unknown as { billing?: BillingNamespace };
-  return bs.billing ?? null;
 }
 
 export type BillingOverview =
@@ -78,8 +26,7 @@ export type BillingOverview =
 
 // One call for the billing page: status plus (when active) products and prices.
 export async function getBillingOverview(): Promise<BillingOverview> {
-  const billing = getBillingNamespace();
-  if (!billing) return { state: "unavailable" };
+  const billing = getServerClient().billing;
 
   try {
     const status = await billing.getStatus();
@@ -111,9 +58,7 @@ export async function createCheckout({
   successUrl: string;
   cancelUrl: string;
 }): Promise<{ url: string }> {
-  const billing = getBillingNamespace();
-  if (!billing) throw new Error("Billing is not available");
-  return billing.createCheckout({ userId, priceId, successUrl, cancelUrl });
+  return getServerClient().billing.createCheckout({ userId, priceId, successUrl, cancelUrl });
 }
 
 export async function createPortalSession({
@@ -123,9 +68,7 @@ export async function createPortalSession({
   userId: string;
   returnUrl: string;
 }): Promise<{ url: string }> {
-  const billing = getBillingNamespace();
-  if (!billing) throw new Error("Billing is not available");
-  return billing.createPortalSession({ userId, returnUrl });
+  return getServerClient().billing.createPortalSession({ userId, returnUrl });
 }
 
 export async function getSubscription({
@@ -133,10 +76,8 @@ export async function getSubscription({
 }: {
   userId: string;
 }): Promise<BillingSubscription | null> {
-  const billing = getBillingNamespace();
-  if (!billing) return null;
   try {
-    const { subscription } = await billing.getSubscription({ userId });
+    const { subscription } = await getServerClient().billing.getSubscription({ userId });
     return subscription;
   } catch (err) {
     if (err instanceof BuildspaceError) {
@@ -150,10 +91,8 @@ export async function getSubscription({
 // Gate paid features with this: `if (await hasEntitlement({ userId })) { ... }`.
 // Resolves false (never throws) when billing is unavailable or the user is unpaid.
 export async function hasEntitlement({ userId }: { userId: string }): Promise<boolean> {
-  const billing = getBillingNamespace();
-  if (!billing) return false;
   try {
-    const { active } = await billing.getEntitlements({ userId });
+    const { active } = await getServerClient().billing.getEntitlements({ userId });
     return active;
   } catch (err) {
     if (err instanceof BuildspaceError) {

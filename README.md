@@ -51,6 +51,20 @@ Each slice is deletable: remove its folder, nav entry, and table. `AGENTS.md` ha
 
 The project ships agent skills (in `.claude/skills/` and `.agents/skills/`) whose recipes point at the real files in this repo. Ask your AI assistant to "add a feature" and it will follow `references/new-feature-playbook.md` — the same vertical-slice checklist the built-in examples use.
 
+### First prompt for your agent
+
+Starting in your editor? Paste this into Claude Code, Codex, or any coding agent (replace the last line with your idea):
+
+```text
+You're working in a Buildspace starter app. Before writing any code:
+1. Read AGENTS.md — it has the commands, conventions, and workflow.
+2. Read the skills in .agents/skills/ (buildspace-examples, buildspace-sdk, buildspace-cli) —
+   their recipes point at real files in this repo. Extend those patterns; don't invent new ones.
+3. Verify your work with `bun run verify` before committing, and deploy to dev with `buildspace deploy`.
+
+Now build: <describe your app idea here>
+```
+
 ## Build
 
 ```bash

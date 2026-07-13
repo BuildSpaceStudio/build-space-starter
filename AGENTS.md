@@ -14,6 +14,8 @@ Use `bun` — scripts are defined in `package.json`.
 | `bun lint` | Biome lint check |
 | `bun lint:fix` | Biome auto-fix |
 | `bun typecheck` | TypeScript type check |
+| `bun run test` | Vitest unit tests |
+| `bun run verify` | The full gate: lint + typecheck + build + test |
 
 ### Database (Drizzle + libSQL/Turso)
 
@@ -87,6 +89,15 @@ Each example slice is deletable:
 4. Slice-specific extras: **files** also uses `lib/utils.ts#formatBytes`; **billing** also owns `lib/billing.ts` and `NEXT_PUBLIC_APP_URL` in `lib/env.ts`; **settings** owns the avatar flow (`users.avatarUrl`); **admin** owns `adminActionClient` in `lib/safe-action.ts`. Delete those with the slice if nothing else uses them.
 5. `bun lint && bun typecheck && bun build`.
 
+## Testing
+
+Vitest, colocated `*.test.ts` files, `environment: "node"`. Two exemplars show the patterns to copy:
+
+- `lib/utils.test.ts` — pure `lib/` helper test, no mocks.
+- `app/dashboard/todos/actions.test.ts` — server-action test: mock the seams (`@/lib/auth`, `@/lib/db`, `@/lib/analytics`, `next/cache`) and call the action like the client would; assert data, `serverError`, and `validationErrors` paths.
+
+`vitest.config.ts` aliases `server-only` to an empty stub (`test/stubs/server-only.ts`) so server-only modules import cleanly. New features should ship with a test — run `bun run test` (or the full `bun run verify`) before committing.
+
 ## Next.js 16 gotchas
 
 - `cookies()` and `headers()` are **async** — always `await` them.
@@ -98,6 +109,18 @@ Each example slice is deletable:
 
 - `next.config.ts` sets `output: "standalone"`; `bun build` copies static assets into the standalone dir (`scripts/copy-standalone-assets.mjs`); `bun start` runs `node .next/standalone/server.js`.
 - `railway.json`: Railpack build, `preDeployCommand: bun run db:migrate` (which is why `drizzle-kit` is a runtime dependency), healthcheck at `/api/health` (always 200, DB status in the body).
+- `buildspace deploy` pushes HEAD to the dev branch (`buildspace/dev`) and syncs the hosted dev environment. Add `--wait` to follow the deployment to a terminal state.
+
+## Ship to production
+
+Dev deploys never touch production — the production URL serves nothing until you roll out. When the app is ready (or the creator asks to "go live" / "ship it"):
+
+```bash
+buildspace promote --latest --yes --watch   # roll out the current dev branch, follow to completion
+buildspace deploy status --env prod         # confirm prod is live and get the URL
+```
+
+`--yes` is required in non-interactive sessions; `--watch` exits non-zero if the rollout fails (then check `buildspace deploy logs --env prod --latest`). After a successful rollout, hit `<prod-url>/api/health` to verify the app responds. Full reference: `.agents/skills/buildspace-cli/SKILL.md`.
 
 ## Skills
 
@@ -113,4 +136,4 @@ Skills are in `.agents/skills/`. Read the relevant SKILL.md before implementing 
 
 ## Workflow
 
-1. Implement → 2. Verify (`bun lint && bun typecheck && bun build`) → 3. Commit (conventional format) → 4. Deploy (`buildspace deploy`)
+1. Implement → 2. Verify (`bun run verify`) → 3. Commit (conventional format) → 4. Deploy to dev (`buildspace deploy`) → 5. When ready to go live: `buildspace promote --latest --yes --watch`
