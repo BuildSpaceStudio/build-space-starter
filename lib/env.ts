@@ -3,6 +3,11 @@ import { z } from "zod";
 
 export const env = createEnv({
   emptyStringAsUndefined: true,
+  // Skip validation when SKIP_ENV_VALIDATION is set. Server secrets aren't
+  // available at build time in a Dockerfile build (they're injected at
+  // runtime), so `next build` would otherwise fail collecting page data.
+  // Railpack builds leave this unset and validate as normal.
+  skipValidation: !!process.env.SKIP_ENV_VALIDATION,
   server: {
     BUILDSPACE_SECRET_KEY: z.string().min(1),
     BUILDSPACE_DB_URL: z.string().optional(),

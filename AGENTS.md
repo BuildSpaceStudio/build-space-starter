@@ -109,6 +109,7 @@ Vitest, colocated `*.test.ts` files, `environment: "node"`. Two exemplars show t
 
 - `next.config.ts` sets `output: "standalone"`; `bun build` copies static assets into the standalone dir (`scripts/copy-standalone-assets.mjs`); `bun start` runs `node .next/standalone/server.js`.
 - `railway.json`: Railpack build, `preDeployCommand: bun run db:migrate` (which is why `drizzle-kit` is a runtime dependency), healthcheck at `/api/health` (always 200, DB status in the body).
+- **System packages?** Rename `Dockerfile.example` → `Dockerfile` and set `"builder": "DOCKERFILE"` in `railway.json`. The `deploy` block is builder-independent (migrations/healthcheck unchanged). Build with `SKIP_ENV_VALIDATION=1` — `lib/env.ts` honors it so server secrets don't need to be present at build time; `NEXT_PUBLIC_*` still must be passed as Docker build args.
 - `buildspace deploy` pushes HEAD to the dev branch (`buildspace/dev`) and syncs the hosted dev environment. Add `--wait` to follow the deployment to a terminal state.
 
 ## Ship to production

@@ -90,6 +90,18 @@ What happens on Railway (configured in `railway.json`):
 2. **Pre-deploy**: `bun run db:migrate` applies any pending Drizzle migrations against the managed database — schema changes ship with the code, no manual step.
 3. The server starts and Railway health-checks `/api/health` (always fast-200; DB reachability is reported in the response body).
 
+### Deploying with a Dockerfile (system packages)
+
+Railpack is the default and is right for most apps. Switch to a Dockerfile only when you need **OS-level system packages** — `ffmpeg`, Chromium/Playwright, ImageMagick, fonts, and the like:
+
+1. Rename `Dockerfile.example` (shipped in this repo) to `Dockerfile` and add your packages in the runtime stage.
+2. In `railway.json`, set the builder to `DOCKERFILE`:
+   ```json
+   "build": { "builder": "DOCKERFILE" }
+   ```
+
+The `deploy` block is builder-independent — migrations, start command, and healthcheck all keep working. Note the build-time vs. runtime env split: `NEXT_PUBLIC_*` values are inlined at build time (pass them as Docker build args), while server secrets are injected at runtime (build with `SKIP_ENV_VALIDATION=1`). Full reference: [Hosting → Build config](https://docs.buildspace.studio/docs/hosting/build-config).
+
 Environment variables in deployed environments:
 
 - `BUILDSPACE_DB_URL` / `BUILDSPACE_DB_TOKEN` — **auto-injected** by BuildSpace when the app is created.

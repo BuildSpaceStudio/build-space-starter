@@ -1,0 +1,80 @@
+# syntax=docker/dockerfile:1
+#
+# Known-good Dockerfile for a Buildspace starter app (Next.js standalone + Bun).
+#
+# The default build uses Railway's Railpack builder (see railway.json) and needs
+# no Dockerfile. Reach for this only when you need OS-level system packages that
+# Railpack can't install — e.g. ffmpeg, Chromium/Playwright, ImageMagick, fonts.
+#
+# To use it:
+#   1. Rename this file to `Dockerfile`.
+#   2. In railway.json set the builder to DOCKERFILE:
+#        "build": { "builder": "DOCKERFILE" }
+#   3. Uncomment the apt-get block below and add the packages you need.
+#
+# The deploy config in railway.json (startCommand, preDeployCommand, healthcheck)
+# is builder-independent — Railway still runs `bun run db:migrate` before the new
+# release and health-checks /api/health, exactly as it does under Railpack.
+
+# ---- deps: install all dependencies, cached on the lockfile ----------------
+FROM oven/bun:1 AS deps
+WORKDIR /app
+COPY package.json bun.lock ./
+RUN bun install --frozen-lockfile
+
+# ---- build: compile the Next.js standalone output --------------------------
+FROM oven/bun:1 AS build
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+# NEXT_PUBLIC_* vars are inlined into the client bundle at BUILD time, so they
+# must exist here. Railway supplies matching service variables as build args
+# when you declare them with ARG. SKIP_ENV_VALIDATION lets the build run
+# without the server-only secrets (BUILDSPACE_SECRET_KEY, DB creds) — those are
+# injected at runtime instead.
+ARG NEXT_PUBLIC_BUILDSPACE_PUBLISHABLE_KEY
+ARG NEXT_PUBLIC_APP_URL
+ENV NEXT_PUBLIC_BUILDSPACE_PUBLISHABLE_KEY=$NEXT_PUBLIC_BUILDSPACE_PUBLISHABLE_KEY
+ENV NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL
+ENV SKIP_ENV_VALIDATION=1
+ENV NEXT_TELEMETRY_DISABLED=1
+RUN bun run build
+
+# ---- prod-deps: production-only modules for the runtime image --------------
+# Kept separate so the runtime image carries drizzle-kit (a runtime dependency)
+# for the preDeployCommand migration, without the dev toolchain.
+FROM oven/bun:1 AS prod-deps
+WORKDIR /app
+COPY package.json bun.lock ./
+RUN bun install --frozen-lockfile --production
+
+# ---- runtime ---------------------------------------------------------------
+FROM oven/bun:1 AS runtime
+WORKDIR /app
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV PORT=3000
+ENV HOSTNAME=0.0.0.0
+
+# --- System packages -------------------------------------------------------
+# This is the whole reason to use a Dockerfile instead of Railpack. Add what
+# your app needs at runtime, e.g.:
+# RUN apt-get update \
+#   && apt-get install -y --no-install-recommends ffmpeg \
+#   && rm -rf /var/lib/apt/lists/*
+# ---------------------------------------------------------------------------
+
+# Standalone server + its bundled assets (static/public were copied into the
+# standalone tree by the postbuild step in `bun run build`).
+COPY --from=build /app/.next/standalone ./.next/standalone
+
+# Drizzle tooling + config for the preDeployCommand (`bun run db:migrate`).
+COPY --from=prod-deps /app/node_modules ./node_modules
+COPY package.json drizzle.config.ts ./
+COPY drizzle ./drizzle
+COPY lib ./lib
+
+EXPOSE 3000
+# Railway's startCommand (`bun run start`) overrides this CMD in deploys; it is
+# here so `docker run` reproduces the deployed behavior locally.
+CMD ["bun", "run", "start"]
