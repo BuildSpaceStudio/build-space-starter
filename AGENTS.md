@@ -135,6 +135,10 @@ Skills are in `.agents/skills/`. Read the relevant SKILL.md before implementing 
 
 `.claude/skills/` and `.agents/skills/` must stay identical — update both (CI diffs them).
 
+## Plans
+
+Multi-step work (features, refactors) goes through `__plans__/`. When asked to plan a change, write a short plan there first — one file per effort, `<n>-<slug>.md` — recording the goal, files to touch, approach, risks, and a one-line `Status:`. Read any relevant existing plan in `__plans__/` before starting, and update its status line as work progresses. Plans are version-controlled alongside the code; read, edit, or delete them freely. Don't block on the creator approving a plan unless they ask — default to plan-then-execute when given the go-ahead.
+
 ## Workflow
 
 1. Implement → 2. Verify (`bun run verify`) → 3. Commit (conventional format) → 4. Deploy to dev (`buildspace deploy`) → 5. When ready to go live: `buildspace promote --latest --yes --watch`
