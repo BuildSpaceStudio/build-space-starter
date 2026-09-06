@@ -75,6 +75,24 @@ Pages mirror the same tiers: `getSession()` guard for member pages, `getCurrentU
 - Use `<PageHeader>` at the top of every dashboard page and `<EmptyState>` for zero/unconfigured states.
 - Every dashboard slice has a `loading.tsx` built from `<Skeleton>`.
 
+### Design tokens (Tailwind v4 silently drops unknown utilities)
+
+Only the tokens actually defined in `app/globals.css` exist as Tailwind classes — an invented
+name like `shadow-card-md` compiles and lints clean but renders nothing, because Tailwind v4
+just drops unrecognized utilities instead of erroring. Before using a `shadow-*` or pastel
+`*-bg`/`*-icon`/`*-text`/`*-dot` class, check it's in this list (or `app/globals.css` directly):
+
+- **Shadows**: `shadow-card`, `shadow-card-hover`, `shadow-card-sm`, `shadow-card-sm-hover`.
+  There is no `-md` size. The hover pattern is a lift + bigger shadow, not just a bigger shadow:
+  `shadow-card-sm transition-all hover:-translate-x-px hover:-translate-y-px hover:shadow-card-sm-hover`
+  (or the `shadow-card`/`shadow-card-hover` pair for larger elements).
+- **Pastel families** (`lilac`, `peach`, `mint`, `sky`, `butter`, `rose`), each with `-bg`,
+  `-icon`, `-text`, `-dot` suffixes only — e.g. `bg-mint-icon`, `text-mint-text`. Don't invent
+  other suffixes. See design.md's card-and-accent discipline: an icon tile or accent text, never
+  a whole card fill by default, and don't repeat one family across sibling cards.
+- **Radius**: `rounded-sm`, `rounded-md`, `rounded-lg`, `rounded-xl` map to the scale in
+  `globals.css` — no extra sizes beyond those.
+
 ## Patterns
 
 Features are **vertical slices**: one folder under `app/dashboard/<slice>/` with page + actions + components, one nav entry, usually one table. `app/dashboard/todos/` is the reference slice. The full checklist is in `.agents/skills/buildspace-examples/references/new-feature-playbook.md`.

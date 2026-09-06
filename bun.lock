@@ -26,7 +26,7 @@
       },
       "devDependencies": {
         "@biomejs/biome": "^2.4.16",
-        "@buildspacestudio/cli": "^0.6.0",
+        "@buildspacestudio/cli": "^0.11.0",
         "@tailwindcss/postcss": "^4.3.0",
         "@types/node": "^25.9.1",
         "@types/react": "^19.2.15",
@@ -66,7 +66,7 @@
 
     "@biomejs/cli-win32-x64": ["@biomejs/cli-win32-x64@2.5.4", "", { "os": "win32", "cpu": "x64" }, "sha512-U1jaluLw1qQc2Tx7/CeSoL9N5XcqIH+GWjpUAy1ouB5nVjSCMNO+NNHdY3RAs8zxNurLWAdj6pehQdCA2zyU+Q=="],
 
-    "@buildspacestudio/cli": ["@buildspacestudio/cli@0.6.0", "", { "bin": { "buildspace": "dist/index.js" } }, "sha512-3lAde+QxNl7jvmT4lnGUr7i8EWWc0KXNJOYcv25yDZpAPyWW10J4tnN/P++Wk3akXCDHPCTpZncvc2e6AJU+2g=="],
+    "@buildspacestudio/cli": ["@buildspacestudio/cli@0.11.0", "", { "bin": { "buildspace": "dist/index.js" } }, "sha512-t74aq9xv/x4TvSsCmpfKonBUQqA7iH6hSwXSJ4aG3aCPsP7VCmyMMhkPernWOPMzIFTPEaYUJUvuYz3MwbcaqA=="],
 
     "@buildspacestudio/sdk": ["@buildspacestudio/sdk@0.4.0", "", { "peerDependencies": { "react": ">=19" }, "optionalPeers": ["react"] }, "sha512-tqwMu1MLxQKqgKq7Ac8a0gimO6cxiOKzBs5NUJcZwlc0AiLMpIX0n0eGFRYrb8CPLh/E/lUwJZ+1iMEc1+dAPA=="],
 
