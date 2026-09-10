@@ -43,7 +43,11 @@ async function main() {
   await db.insert(todos).values([
     { userId: admin.buildspaceUserId, text: "Read AGENTS.md" },
     { userId: admin.buildspaceUserId, text: "Explore the dashboard slices" },
-    { userId: admin.buildspaceUserId, text: "Deploy with `buildspace deploy`", completed: true },
+    {
+      userId: admin.buildspaceUserId,
+      text: "Ship with `git push && buildspace agent reset`",
+      completed: true,
+    },
   ]);
 
   console.log("Seeded 1 super_admin user (admin@local.test) and 3 todos.");

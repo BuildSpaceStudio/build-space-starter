@@ -128,7 +128,7 @@ Vitest, colocated `*.test.ts` files, `environment: "node"`. Two exemplars show t
 - `next.config.ts` sets `output: "standalone"`; `bun build` copies static assets into the standalone dir (`scripts/copy-standalone-assets.mjs`); `bun start` runs `node .next/standalone/server.js`.
 - `railway.json`: Railpack build, `preDeployCommand: bun run db:migrate` (which is why `drizzle-kit` is a runtime dependency), healthcheck at `/api/health` (always 200, DB status in the body).
 - **System packages?** Rename `Dockerfile.example` → `Dockerfile` and set `"builder": "DOCKERFILE"` in `railway.json`. The `deploy` block is builder-independent (migrations/healthcheck unchanged). Build with `SKIP_ENV_VALIDATION=1` — `lib/env.ts` honors it so server secrets don't need to be present at build time; `NEXT_PUBLIC_*` still must be passed as Docker build args.
-- `buildspace deploy` pushes HEAD to the dev branch (`buildspace/dev`) and syncs the hosted dev environment. Add `--wait` to follow the deployment to a terminal state.
+- `git push` ships code to the dev branch, but the hosted dev workspace keeps a writable checkout (for in-browser edits) and does not auto-sync — run `buildspace agent reset` after pushing to pull the change into the running preview. `buildspace deploy` itself is read-only (status/history/logs).
 
 ## Ship to production
 
@@ -159,4 +159,4 @@ Multi-step work (features, refactors) goes through `__plans__/`. When asked to p
 
 ## Workflow
 
-1. Implement → 2. Verify (`bun run verify`) → 3. Commit (conventional format) → 4. Deploy to dev (`buildspace deploy`) → 5. When ready to go live: `buildspace promote --latest --yes --watch`
+1. Implement → 2. Verify (`bun run verify`) → 3. Commit (conventional format) → 4. Ship to dev (`git push && buildspace agent reset`) → 5. When ready to go live: `buildspace promote --latest --yes --watch`

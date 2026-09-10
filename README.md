@@ -60,7 +60,7 @@ You're working in a Buildspace starter app. Before writing any code:
 1. Read AGENTS.md — it has the commands, conventions, and workflow.
 2. Read the skills in .agents/skills/ (buildspace-examples, buildspace-sdk, buildspace-cli) —
    their recipes point at real files in this repo. Extend those patterns; don't invent new ones.
-3. Verify your work with `bun run verify` before committing, and deploy to dev with `buildspace deploy`.
+3. Verify your work with `bun run verify` before committing, then ship with `git push && buildspace agent reset` (a push alone doesn't update the running dev preview).
 
 Now build: <describe your app idea here>
 ```
@@ -79,10 +79,11 @@ The build uses Next.js standalone output; `npm start` runs `node .next/standalon
 From a BuildSpace-managed clone:
 
 ```bash
-buildspace deploy
+git push                 # ships code to the dev branch
+buildspace agent reset   # syncs it into the running dev preview
 ```
 
-The repository is the source of truth for what gets deployed. Run `buildspace deploy status` to check progress.
+The hosted dev workspace keeps a writable git checkout so in-browser edits survive restarts — a push alone updates the repo but not what's currently running, so `buildspace agent reset` is what actually pulls your change in. Run `buildspace deploy status` to check progress.
 
 What happens on Railway (configured in `railway.json`):
 
