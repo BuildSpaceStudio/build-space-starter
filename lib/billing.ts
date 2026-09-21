@@ -2,6 +2,7 @@ import "server-only";
 import type { BillingPrice, BillingProduct, BillingStatusResponse } from "@buildspacestudio/sdk";
 import { BuildspaceError } from "@buildspacestudio/sdk";
 import { getServerClient } from "@/lib/buildspace";
+import { log } from "@/lib/log";
 
 // Billing helpers around the SDK's `bs.billing` namespace. Everything degrades
 // gracefully: an app without billing enabled resolves to the
@@ -40,7 +41,7 @@ export async function getBillingOverview(): Promise<BillingOverview> {
     return { state: "active", status, products, prices };
   } catch (err) {
     if (err instanceof BuildspaceError) {
-      console.error(`[billing] overview failed: ${err.code} (${err.status})`);
+      log.error("billing", "overview failed", { code: err.code, status: err.status });
       return { state: "unavailable" };
     }
     throw err;
@@ -81,7 +82,7 @@ export async function getSubscription({
     return subscription;
   } catch (err) {
     if (err instanceof BuildspaceError) {
-      console.error(`[billing] subscription lookup failed: ${err.code} (${err.status})`);
+      log.error("billing", "subscription lookup failed", { code: err.code, status: err.status });
       return null;
     }
     throw err;
@@ -96,7 +97,7 @@ export async function hasEntitlement({ userId }: { userId: string }): Promise<bo
     return active;
   } catch (err) {
     if (err instanceof BuildspaceError) {
-      console.error(`[billing] entitlement check failed: ${err.code} (${err.status})`);
+      log.error("billing", "entitlement check failed", { code: err.code, status: err.status });
       return false;
     }
     throw err;

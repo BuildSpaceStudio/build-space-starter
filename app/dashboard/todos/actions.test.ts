@@ -8,6 +8,7 @@ const mocks = vi.hoisted(() => ({
   getSession: vi.fn(),
   trackEvent: vi.fn(),
   revalidatePath: vi.fn(),
+  insertValues: vi.fn(),
   insertedTodo: { id: "todo_1", text: "write tests", completed: false, userId: "user_1" },
 }));
 
@@ -17,7 +18,10 @@ vi.mock("next/cache", () => ({ revalidatePath: mocks.revalidatePath }));
 vi.mock("@/lib/db", () => ({
   db: {
     insert: () => ({
-      values: () => ({ returning: () => Promise.resolve([mocks.insertedTodo]) }),
+      values: (values: unknown) => {
+        mocks.insertValues(values);
+        return { returning: () => Promise.resolve([mocks.insertedTodo]) };
+      },
     }),
   },
   schema: { todos: {} },
@@ -42,6 +46,10 @@ describe("createTodo", () => {
       expect.objectContaining({ event: "todo_created", userId: "user_1" }),
     );
     expect(mocks.revalidatePath).toHaveBeenCalledWith("/dashboard/todos");
+    // scopedTo() stamps the owner from the session, not from the input.
+    expect(mocks.insertValues).toHaveBeenCalledWith(
+      expect.objectContaining({ text: "write tests", userId: "user_1" }),
+    );
   });
 
   it("rejects unauthenticated calls", async () => {

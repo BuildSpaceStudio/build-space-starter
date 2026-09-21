@@ -11,6 +11,9 @@ export default function ErrorBoundary({
   reset: () => void;
 }) {
   useEffect(() => {
+    // Browser console only — `lib/log.ts` is server-only. Next.js already
+    // strips the message in production builds, so nothing sensitive leaks here.
+    // biome-ignore lint/suspicious/noConsole: client-side error boundary
     console.error(error);
   }, [error]);
 

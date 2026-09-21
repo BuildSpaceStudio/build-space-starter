@@ -5,6 +5,8 @@ import { trackEvent } from "@/lib/analytics";
 import { getServerClient } from "@/lib/buildspace";
 import { upsertUserFromSession } from "@/lib/db/users";
 import { sendWelcomeEmail } from "@/lib/email";
+import { env } from "@/lib/env";
+import { log } from "@/lib/log";
 
 // Railway's edge proxy terminates TLS and forwards to this container over its
 // internal address, so `request.nextUrl.origin`/`request.url` resolve to
@@ -41,7 +43,7 @@ export async function GET(request: NextRequest) {
     // normal app, not just a misconfiguration. Send the visitor back to sign
     // in again instead of a 500.
     if (err instanceof BuildspaceError) {
-      console.error("[auth] callback code exchange failed", err);
+      log.error("auth", "callback code exchange failed", { code: err.code, status: err.status });
       return NextResponse.redirect(new URL("/?auth_error=1", origin));
     }
     throw err;
@@ -61,13 +63,13 @@ export async function GET(request: NextRequest) {
       await sendWelcomeEmail({ to: user.email, name: user.name });
     }
   } catch (err) {
-    console.error("[auth] user upsert failed", err);
+    log.error("auth", "user upsert failed", { err });
   }
 
   const jar = await cookies();
   jar.set("bs_session", access_token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: env.NODE_ENV === "production",
     sameSite: "lax",
     maxAge: expires_in,
     path: "/",

@@ -149,6 +149,56 @@ buildspace env pull [--env dev|prod] [--output .env.local]
 
 Writes non-secret variable keys and masked previews to `.env.local` (or the `--output` path). Useful for bootstrapping a local dev environment with the correct key names.
 
+## Custom domains
+
+`buildspace domains` points a domain the creator owns at an app environment. Buildspace attaches it to the runtime service and returns the DNS records the creator must create at their **own** DNS provider — Buildspace never touches their registrar.
+
+```bash
+buildspace domains add app.theirbrand.com                 # prod (default)
+buildspace domains add dev.theirbrand.com --env dev
+buildspace domains verify app.theirbrand.com              # re-check DNS + certificate
+buildspace domains list --json                            # both envs, status + pending records
+buildspace domains remove app.theirbrand.com
+```
+
+`add` prints a `CNAME` (traffic) and a `TXT` (verification) record. Nothing is live until both resolve; until then the app keeps serving on `<slug>.apps.buildspace.studio`, which stays as a fallback afterward. Re-run `verify` until status is `active` — DNS propagation can take minutes to hours, so do not loop tightly.
+
+Apex domains (`theirbrand.com`) cannot take a plain `CNAME`; the creator needs their provider's ALIAS/ANAME/CNAME-flattening record, or should use a subdomain and redirect the apex.
+
+Login redirects to the domain are allowed by default so the OAuth callback works there; toggle with `buildspace domains auth <domain> on|off`. The app sets its own first-party session cookie on that domain (`Secure`, `HttpOnly`, `SameSite=Lax`).
+
+Full reference: `https://docs.buildspace.studio/docs/hosting/custom-domains`.
+
+## Standalone databases
+
+`buildspace db` manages SQLite databases owned by your organization rather than by a project — useful for scratch data, prototypes, or data shared across projects. They are separate from the per-environment database each project already gets.
+
+```bash
+buildspace db list                                  # list databases + quota usage
+buildspace db create "Scratch data"                 # prints the connection URL + token ONCE
+buildspace db show scratch-data                     # usage + token inventory
+buildspace db delete scratch-data --yes             # destroys the database and its data
+```
+
+Run SQL server-side (read-only unless `--write` is passed):
+
+```bash
+buildspace db shell scratch-data --sql "select count(*) from users"
+buildspace db shell scratch-data --write --sql "delete from sessions"
+cat migration.sql | buildspace db shell scratch-data --write
+```
+
+Tokens are per-database; mint one per consumer so you can revoke narrowly:
+
+```bash
+buildspace db token create scratch-data --label analytics --read-only
+buildspace db token revoke scratch-data <tokenId>
+```
+
+Every subcommand accepts the database slug or its UUID, and supports `--json`. Connect from code with `@libsql/client` using the printed URL plus the token in an env var — never hardcode the token.
+
+Full reference: `https://docs.buildspace.studio/docs/database/standalone-databases`.
+
 ## Pages
 
 `buildspace pages` publishes a single HTML file to a hosted, gated URL under your creator handle — no project, build, or deploy required. Buildspace stores and serves the file as-is; it never generates, rewrites, or executes it.

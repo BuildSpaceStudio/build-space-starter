@@ -1,4 +1,3 @@
-import { desc } from "drizzle-orm";
 import { Users } from "lucide-react";
 import { redirect } from "next/navigation";
 import { EmptyState } from "@/components/empty-state";
@@ -14,7 +13,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { getCurrentUser } from "@/lib/auth";
-import { db, schema } from "@/lib/db";
+import { listUsers } from "@/lib/db/users";
 import { RoleSelect } from "./role-select";
 
 // Role-gated page: the nav hides this entry for members, but the page itself
@@ -24,7 +23,9 @@ export default async function AdminPage() {
   if (!current) redirect("/");
   if (current.role !== "super_admin") redirect("/dashboard");
 
-  const users = await db.select().from(schema.users).orderBy(desc(schema.users.createdAt));
+  // Admin-only query, defined in lib/db/users.ts — app code stays out of the
+  // query builder so every unscoped read has one reviewable home.
+  const users = await listUsers();
 
   return (
     <div className="flex flex-col gap-6">

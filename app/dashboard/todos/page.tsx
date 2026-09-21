@@ -1,11 +1,12 @@
-import { desc, eq } from "drizzle-orm";
+import { desc } from "drizzle-orm";
 import { ListTodo } from "lucide-react";
 import { redirect } from "next/navigation";
 import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { getSession } from "@/lib/auth";
-import { db, schema } from "@/lib/db";
+import { schema } from "@/lib/db";
+import { scopedTo } from "@/lib/db/scoped";
 import { TodoForm } from "./todo-form";
 import { TodoItem } from "./todo-item";
 
@@ -13,10 +14,10 @@ export default async function TodosPage() {
   const session = await getSession();
   if (!session) redirect("/");
 
-  const todos = await db
-    .select()
-    .from(schema.todos)
-    .where(eq(schema.todos.userId, session.user.id))
+  // Reads are scoped the same way writes are — the page can't accidentally
+  // render another user's rows.
+  const todos = await scopedTo(session.user.id)
+    .select(schema.todos)
     .orderBy(desc(schema.todos.createdAt));
 
   return (

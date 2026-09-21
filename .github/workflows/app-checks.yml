@@ -1,0 +1,29 @@
+name: Checks
+
+# Runs the same gate as `bun run verify`, so nothing reaches a deploy branch
+# without passing lint, types, the guardrail conformance tests, and a build.
+# Delete this file if you'd rather not use GitHub Actions — the gate still
+# works locally.
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - run: bun install --frozen-lockfile
+
+      - run: bun run verify
+        env:
+          # The build only needs the env shape to be valid, not real keys —
+          # lib/env.ts honors SKIP_ENV_VALIDATION for exactly this case.
+          SKIP_ENV_VALIDATION: "1"

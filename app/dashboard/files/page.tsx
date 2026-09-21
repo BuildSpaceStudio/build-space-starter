@@ -6,6 +6,7 @@ import { PageHeader } from "@/components/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { getSession } from "@/lib/auth";
 import { getServerClient } from "@/lib/buildspace";
+import { log } from "@/lib/log";
 import { FileRow } from "./file-row";
 import { FileUploader } from "./file-uploader";
 
@@ -18,7 +19,7 @@ async function listFiles(userId: string) {
     return { objects, available: true };
   } catch (err) {
     if (err instanceof BuildspaceError) {
-      console.error(`[files] list failed: ${err.code} (${err.status})`);
+      log.error("files", "list failed", { code: err.code, status: err.status });
       return { objects: [], available: false };
     }
     throw err;

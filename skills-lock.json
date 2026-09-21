@@ -4,17 +4,20 @@
     "buildspace-cli": {
       "source": "buildspacestudio/skills",
       "sourceType": "github",
-      "computedHash": "c1e00e9a67608b7ab30ac1ca47049ff833b36e1e32a0bb6985426245f7737bdc"
+      "skillPath": "skills/buildspace-cli/SKILL.md",
+      "computedHash": "3e6ab88417d788d68e0ddeb08ae141e9a9f7375d515c310bb3a5e99289e5b7e4"
     },
     "buildspace-examples": {
       "source": "buildspacestudio/skills",
       "sourceType": "github",
-      "computedHash": "78230ad5e44fd14425a05c73f8dbf4a52538f7ef45ada0d7550013ee0f280c27"
+      "skillPath": "skills/buildspace-examples/SKILL.md",
+      "computedHash": "e7a14507c888354d73455c71bb84bce1d87d8a1e235572cc87998fa5bff5f739"
     },
     "buildspace-sdk": {
       "source": "buildspacestudio/skills",
       "sourceType": "github",
-      "computedHash": "64e65035ed855a89691d846fb3d8047dfb0cc6cf96f2eabdcb23031d8b8e225b"
+      "skillPath": "skills/buildspace-sdk/SKILL.md",
+      "computedHash": "ff6d5c0b6db184eabc533358c2b19ea72c1a1baccc93e41288066f126348ec51"
     }
   }
 }

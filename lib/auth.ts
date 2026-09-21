@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { getServerClient } from "@/lib/buildspace";
 import type { UserRecord } from "@/lib/db/schema";
 import { getUserByBuildspaceId } from "@/lib/db/users";
+import { log } from "@/lib/log";
 
 export async function getSession() {
   const jar = await cookies();
@@ -30,7 +31,7 @@ export async function getCurrentUser(): Promise<{
   try {
     record = await getUserByBuildspaceId(session.user.id);
   } catch (err) {
-    console.error("[auth] local user lookup failed", err);
+    log.error("auth", "local user lookup failed", { err });
   }
 
   return { session, record, role: record?.role ?? "member" };

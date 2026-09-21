@@ -15,12 +15,13 @@ Use `bun` — scripts are defined in `package.json`.
 | `bun lint:fix` | Biome auto-fix |
 | `bun typecheck` | TypeScript type check |
 | `bun run test` | Vitest unit tests |
-| `bun run verify` | The full gate: lint + typecheck + build + test |
+| `bun run verify` | The full gate: lint + typecheck + build + test (includes the guardrail tests) |
+| `bun run smoke <url>` | Post-deploy smoke test against a live URL |
 
 ### Database (Drizzle + libSQL/Turso)
 
 - Schema lives in `lib/db/schema.ts`. Import the client from `@/lib/db` (server-only).
-- `bun db:generate` — create a new migration from schema changes (never hand-write migrations).
+- `bun db:generate` — create a new migration from schema changes (never hand-write migrations). It refuses to leave a destructive migration (DROP TABLE/COLUMN, table recreation) on disk and prints the safe add → backfill → drop path instead; `--allow-destructive` overrides once you've read it. Migrations apply automatically on deploy, so this check is the difference between a rename and data loss.
 - `bun db:migrate` — apply migrations to the DB at `BUILDSPACE_DB_URL` (defaults to `file:local.db`). Deploys run this automatically (`railway.json` → `preDeployCommand`).
 - `bun db:studio` — open Drizzle Studio.
 - `bun db:seed` — seed a local super_admin + sample todos. Refuses to run against remote DBs.
@@ -44,7 +45,10 @@ Real sign-ins create their own `users` rows via the auth callback; the seeded us
 | `lib/analytics.ts` | `trackEvent()` — server-side events that never throw |
 | `lib/email.ts` | Transactional email; one exported function per message type |
 | `lib/billing.ts` | Billing helpers; feature-detects the SDK namespace, degrades gracefully |
-| `lib/db/users.ts` | Local user mirror (`upsertUserFromSession`, `getUserByBuildspaceId`) |
+| `lib/db/users.ts` | Local user mirror + every query against `users` (self-service and admin-only, each labelled) |
+| `lib/db/scoped.ts` | `scopedTo(userId)` — tenant-scoped select/insert/update/delete for user-owned tables |
+| `lib/api-auth.ts` | `withAuth()` / `withAdmin()` wrappers for route handlers |
+| `lib/log.ts` | `log.info/warn/error` — structured, secret-redacting; use instead of `console.*` |
 | `lib/utils.ts` | `cn()` + `formatBytes()` |
 | `proxy.ts` | Fast cookie-presence check protecting `/dashboard/*` |
 | `components/ui/` | The UI kit (see below) |
@@ -93,6 +97,39 @@ just drops unrecognized utilities instead of erroring. Before using a `shadow-*`
 - **Radius**: `rounded-sm`, `rounded-md`, `rounded-lg`, `rounded-xl` map to the scale in
   `globals.css` — no extra sizes beyond those.
 
+## Guardrails (these fail the build)
+
+Most rules in this file are conventions. These six are enforced by
+`test/guardrails.test.ts`, which runs as part of `bun run test` and `bun run verify` —
+if you break one, the gate tells you which file, which line, and what to do instead.
+
+1. **Every route handler under `app/api/` is authenticated.** `proxy.ts` only guards
+   `/dashboard/*`, so a new route is public by default. Wrap handlers in `withAuth()` /
+   `withAdmin()` from `lib/api-auth.ts` (see `app/api/me/route.ts`), or — if it genuinely is
+   public — add it to `test/public-routes.ts` **with a reason**.
+2. **App code never builds queries on `db` directly.** Use `scopedTo(userId)` from
+   `lib/db/scoped.ts` for user-owned tables; it injects `WHERE user_id = ?` on every read and
+   write, so `update`/`delete` with someone else's id affect zero rows. Queries that aren't
+   user-scoped (admin views, lookups by another key) go in a `lib/db/*.ts` helper where the
+   authorization story can be written down next to the query.
+3. **Every `z.string()` / `z.array()` in an action input is bounded** with `.max(...)`.
+   Unbounded input is an unbounded row, an unbounded log line, and — anywhere it reaches a
+   paid API — an unbounded bill.
+4. **Client components never import server-only modules** (`@/lib/db`, `@/lib/billing`,
+   `@/lib/email`, `@/lib/log`, …). Fetch in a server component and pass data down, or do the
+   work in a server action.
+5. **No dependency that duplicates a platform capability** — no second auth system, ORM, UI
+   kit, mailer, or storage client. The platform equivalent is named in the failure message.
+6. **App code reads config through `lib/env.ts`**, never raw `process.env`.
+
+Plus: every dashboard slice has a `loading.tsx`.
+
+**Escape hatch.** Each rule can be excused on a specific line with a
+`// guardrail-ok: <reason>` comment on or directly above it (see `app/api/health/route.ts`),
+and the route rule uses the `test/public-routes.ts` allowlist. Use them when you're genuinely
+right — a guardrail you can't get past when you're right is one people delete. A false
+positive is a bug in the rule: fix the rule, don't delete the test.
+
 ## Patterns
 
 Features are **vertical slices**: one folder under `app/dashboard/<slice>/` with page + actions + components, one nav entry, usually one table. `app/dashboard/todos/` is the reference slice. The full checklist is in `.agents/skills/buildspace-examples/references/new-feature-playbook.md`.
@@ -103,7 +140,7 @@ Each example slice is deletable:
 
 1. Delete `app/dashboard/<slice>/`.
 2. Remove its entry from `components/dashboard-nav.tsx` (and the card in `app/page.tsx`).
-3. If it owns a table: remove it from `lib/db/schema.ts` and run `bun db:generate`.
+3. If it owns a table: remove it from `lib/db/schema.ts` and run `bun db:generate --allow-destructive` (dropping a table is destructive by definition, so the plain command will refuse it).
 4. Slice-specific extras: **files** also uses `lib/utils.ts#formatBytes`; **billing** also owns `lib/billing.ts` and `NEXT_PUBLIC_APP_URL` in `lib/env.ts`; **settings** owns the avatar flow (`users.avatarUrl`); **admin** owns `adminActionClient` in `lib/safe-action.ts`. Delete those with the slice if nothing else uses them.
 5. `bun lint && bun typecheck && bun build`.
 
@@ -113,6 +150,8 @@ Vitest, colocated `*.test.ts` files, `environment: "node"`. Two exemplars show t
 
 - `lib/utils.test.ts` — pure `lib/` helper test, no mocks.
 - `app/dashboard/todos/actions.test.ts` — server-action test: mock the seams (`@/lib/auth`, `@/lib/db`, `@/lib/analytics`, `next/cache`) and call the action like the client would; assert data, `serverError`, and `validationErrors` paths.
+- `lib/db/scoped.test.ts` — cross-tenant isolation against a real in-memory database. You don't need to copy this per table: `scopedTo()` is tested once and every slice built on it inherits the guarantee.
+- `test/guardrails.test.ts` — the enforced rules above.
 
 `vitest.config.ts` aliases `server-only` to an empty stub (`test/stubs/server-only.ts`) so server-only modules import cleanly. New features should ship with a test — run `bun run test` (or the full `bun run verify`) before committing.
 
@@ -139,7 +178,13 @@ buildspace promote --latest --yes --watch   # roll out the current dev branch, f
 buildspace deploy status --env prod         # confirm prod is live and get the URL
 ```
 
-`--yes` is required in non-interactive sessions; `--watch` exits non-zero if the rollout fails (then check `buildspace deploy logs --env prod --latest`). After a successful rollout, hit `<prod-url>/api/health` to verify the app responds. Full reference: `.agents/skills/buildspace-cli/SKILL.md`.
+Then smoke-test what actually shipped — a green rollout only means the container started:
+
+```bash
+bun run smoke <prod-url>   # health + DB, landing page, /dashboard redirect, 401 on /api/me
+```
+
+`--yes` is required in non-interactive sessions; `--watch` exits non-zero if the rollout fails (then check `buildspace deploy logs --env prod --latest`). Full reference: `.agents/skills/buildspace-cli/SKILL.md`.
 
 ## Skills
 
@@ -159,4 +204,7 @@ Multi-step work (features, refactors) goes through `__plans__/`. When asked to p
 
 ## Workflow
 
-1. Implement → 2. Verify (`bun run verify`) → 3. Commit (conventional format) → 4. Ship to dev (`git push && buildspace agent reset`) → 5. When ready to go live: `buildspace promote --latest --yes --watch`
+1. Implement → 2. Verify (`bun run verify`) → 3. Commit (conventional format) → 4. Ship to dev (`git push && buildspace agent reset`) → 5. When ready to go live: `buildspace promote --latest --yes --watch`, then `bun run smoke <prod-url>`
+
+`bun run verify` is the gate, not a formality: it runs the guardrails above, so "it builds" and
+"it's safe to put in front of users" stop being different questions.

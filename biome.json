@@ -30,19 +30,31 @@
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true,
+      "preset": "recommended",
       "correctness": {
         "noUnusedImports": "warn",
         "noUnusedVariables": "warn"
       },
       "suspicious": {
-        "noConsole": "warn"
+        "noConsole": "error"
       },
       "style": {
         "noNonNullAssertion": "warn"
       }
     }
   },
+  "overrides": [
+    {
+      "includes": ["lib/log.ts", "scripts/**", "lib/db/seed.ts"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noConsole": "off"
+          }
+        }
+      }
+    }
+  ],
   "css": {
     "parser": {
       "cssModules": false,

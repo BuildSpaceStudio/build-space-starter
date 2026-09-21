@@ -16,7 +16,7 @@ function assertOwnKey(key: string, userId: string) {
 // Server-signed download: the browser never sees storage credentials, just a
 // short-lived URL minted on demand.
 export const getFileDownloadUrl = authActionClient
-  .inputSchema(z.object({ key: z.string().min(1) }))
+  .inputSchema(z.object({ key: z.string().min(1).max(512) }))
   .action(async ({ parsedInput, ctx }) => {
     assertOwnKey(parsedInput.key, ctx.session.user.id);
     const bs = getServerClient();
@@ -25,7 +25,7 @@ export const getFileDownloadUrl = authActionClient
   });
 
 export const deleteFile = authActionClient
-  .inputSchema(z.object({ key: z.string().min(1) }))
+  .inputSchema(z.object({ key: z.string().min(1).max(512) }))
   .action(async ({ parsedInput, ctx }) => {
     assertOwnKey(parsedInput.key, ctx.session.user.id);
     const bs = getServerClient();

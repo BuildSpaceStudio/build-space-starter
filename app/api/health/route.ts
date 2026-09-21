@@ -11,6 +11,7 @@ async function checkDb(): Promise<"ok" | "unreachable" | "timeout"> {
     setTimeout(() => resolve("timeout"), 1500);
   });
   const ping = db
+    // guardrail-ok: liveness ping, not user data — nothing to scope to an owner.
     .run(sql`SELECT 1`)
     .then(() => "ok" as const)
     .catch(() => "unreachable" as const);

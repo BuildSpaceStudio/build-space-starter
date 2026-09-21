@@ -1,6 +1,7 @@
 import "server-only";
 import { BuildspaceError } from "@buildspacestudio/sdk";
 import { getServerClient } from "@/lib/buildspace";
+import { log } from "@/lib/log";
 
 // Transactional email lives here: one exported function per message type, each
 // with a small inline HTML template. Emails are best-effort — failures are
@@ -30,9 +31,9 @@ export async function sendWelcomeEmail({
     });
   } catch (err) {
     if (err instanceof BuildspaceError) {
-      console.error(`[email] welcome email failed: ${err.code} (${err.status})`);
+      log.error("email", "welcome email failed", { code: err.code, status: err.status });
       return;
     }
-    console.error("[email] welcome email failed", err);
+    log.error("email", "welcome email failed", { err });
   }
 }

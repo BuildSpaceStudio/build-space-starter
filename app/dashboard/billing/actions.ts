@@ -18,7 +18,7 @@ async function getAppOrigin(): Promise<string> {
 // Server-side checkout is the blessed integration: the session user is bound
 // to the Stripe session here, so billing state lands on the right identity.
 export const startCheckout = authActionClient
-  .inputSchema(z.object({ priceId: z.string().min(1) }))
+  .inputSchema(z.object({ priceId: z.string().min(1).max(128) }))
   .action(async ({ parsedInput, ctx }) => {
     const origin = await getAppOrigin();
     const { url } = await createCheckout({
