@@ -2,11 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import {
-  updateAvatarUrl,
-  updateProfile as updateProfileRecord,
-  upsertUserFromSession,
-} from "@/lib/db/users";
+import { updateProfile as updateProfileRecord, upsertUserFromSession } from "@/lib/db/users";
 import { authActionClient } from "@/lib/safe-action";
 
 // The `users` table is keyed on the BuildSpace user id, not an owned `userId`
@@ -31,23 +27,6 @@ export const updateProfile = authActionClient
       buildspaceUserId: ctx.session.user.id,
       name: parsedInput.name || null,
       marketingOptIn: parsedInput.marketingOptIn,
-    });
-
-    revalidatePath("/dashboard/settings");
-  });
-
-export const updateAvatar = authActionClient
-  .inputSchema(z.object({ key: z.string().min(1).max(512) }))
-  .action(async ({ parsedInput, ctx }) => {
-    // Enforce the avatars/{userId} path convention so users can only point
-    // their profile at files they uploaded.
-    if (parsedInput.key !== `avatars/${ctx.session.user.id}`) {
-      throw new Error("Invalid avatar key");
-    }
-
-    await updateAvatarUrl({
-      buildspaceUserId: ctx.session.user.id,
-      avatarUrl: parsedInput.key,
     });
 
     revalidatePath("/dashboard/settings");

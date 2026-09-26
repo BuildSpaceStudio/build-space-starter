@@ -33,7 +33,7 @@ Open http://localhost:3000. The migrate + seed steps set up a local SQLite file 
 | **Auth** | `components/auth-provider.tsx`, `lib/auth.ts`, `app/api/auth/*` | OAuth flow, HTTP-only cookies, `useAuth()`, session helpers |
 | **Local users** | `lib/db/users.ts`, `app/api/auth/callback/route.ts` | BuildSpace identity mirrored into your own `users` table; first-sign-in hook (signup event + welcome email) |
 | **Todos slice** | `app/dashboard/todos/` | The canonical vertical slice: schema → safe action → server component → toasts |
-| **Files slice** | `app/dashboard/files/` | Browser-direct uploads, server-signed downloads, path-ownership checks |
+| **Files slice** | `app/dashboard/files/` | Browser uploads via `app/api/upload` (`createUploadRoute` + `useUpload`), server-signed downloads, path-ownership checks |
 | **Billing slice** | `app/dashboard/billing/`, `lib/billing.ts` | Stripe checkout, customer portal, entitlement gating, test-mode banner |
 | **Settings slice** | `app/dashboard/settings/` | Profile form (read-modify-write) + avatar upload |
 | **Admin slice** | `app/dashboard/admin/` | Role-gated page and actions (`adminActionClient`) |

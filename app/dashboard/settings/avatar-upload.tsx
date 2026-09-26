@@ -1,41 +1,32 @@
 "use client";
 
-import { useAction } from "next-safe-action/hooks";
-import { useRef, useState } from "react";
+import { useUpload } from "@buildspacestudio/sdk/react";
+import { useRouter } from "next/navigation";
+import { useRef } from "react";
 import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { getBrowserClient } from "@/lib/buildspace-client";
-import { updateAvatar } from "./actions";
 
-// Browser-direct upload: the file goes straight from the browser to storage via
-// bs.storage.upload, then a server action records the key on the users row.
+// Uploads through `app/api/upload/avatar`, which picks the key and saves it on
+// the users row after the upload is confirmed.
 export function AvatarUpload({
-  userId,
   initials,
   avatarUrl,
 }: {
-  userId: string;
   initials: string;
   avatarUrl: string | null;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
-  const [uploading, setUploading] = useState(false);
-  const { execute: saveAvatar } = useAction(updateAvatar, {
-    onSuccess: () => toast.success("Avatar updated"),
-    onError: ({ error }) => toast.error(error.serverError ?? "Failed to save avatar"),
-  });
+  const router = useRouter();
+  const { upload, isUploading } = useUpload({ endpoint: "/api/upload/avatar" });
 
   async function handleFile(file: File) {
-    setUploading(true);
     try {
-      const bs = getBrowserClient();
-      const { key } = await bs.storage.upload(file, { path: `avatars/${userId}` });
-      saveAvatar({ key });
+      await upload(file);
+      toast.success("Avatar updated");
+      router.refresh();
     } catch {
       toast.error("Upload failed — is storage configured for this app?");
-    } finally {
-      setUploading(false);
     }
   }
 
@@ -50,10 +41,10 @@ export function AvatarUpload({
           type="button"
           variant="outline"
           size="sm"
-          disabled={uploading}
+          disabled={isUploading}
           onClick={() => inputRef.current?.click()}
         >
-          {uploading ? "Uploading…" : "Upload avatar"}
+          {isUploading ? "Uploading…" : "Upload avatar"}
         </Button>
         <p className="text-xs text-muted-foreground">PNG or JPG, up to 2&nbsp;MB.</p>
       </div>

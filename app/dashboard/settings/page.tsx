@@ -48,7 +48,6 @@ export default async function SettingsPage() {
         </CardHeader>
         <CardContent>
           <AvatarUpload
-            userId={session.user.id}
             initials={initials(record?.name ?? session.user.name, session.user.email)}
             avatarUrl={avatarSignedUrl}
           />

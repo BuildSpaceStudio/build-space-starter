@@ -1,43 +1,38 @@
 "use client";
 
+import { useUpload } from "@buildspacestudio/sdk/react";
 import { Upload } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { getBrowserClient } from "@/lib/buildspace-client";
 
 const MAX_SIZE = 10 * 1024 * 1024;
 
-// Browser-direct upload: bs.storage.upload requests a signed URL and PUTs the
-// file straight to storage — the file never passes through your server.
-export function FileUploader({ userId }: { userId: string }) {
+// Browser upload via `app/api/upload`: the route checks the session and picks
+// the key, then the file goes straight to storage over a signed URL.
+export function FileUploader() {
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
-  const [uploading, setUploading] = useState(false);
+  const { upload, isUploading, progress } = useUpload({ endpoint: "/api/upload" });
 
   async function handleFile(file: File) {
-    setUploading(true);
     try {
-      const bs = getBrowserClient();
-      const { key } = await bs.storage.upload(file, {
-        path: `files/${userId}/${file.name}`,
-      });
-      bs.events.track("file_uploaded", { key, size: file.size });
+      const { key } = await upload(file);
+      getBrowserClient().events.track("file_uploaded", { key, size: file.size });
       toast.success("File uploaded");
       router.refresh();
     } catch {
       toast.error("Upload failed — is storage configured for this app?");
-    } finally {
-      setUploading(false);
     }
   }
 
   return (
     <>
-      <Button disabled={uploading} onClick={() => inputRef.current?.click()}>
+      <Button disabled={isUploading} onClick={() => inputRef.current?.click()}>
         <Upload className="h-4 w-4" />
-        {uploading ? "Uploading…" : "Upload file"}
+        {isUploading ? `Uploading${progress === null ? "…" : ` ${progress}%`}` : "Upload file"}
       </Button>
       <input
         ref={inputRef}

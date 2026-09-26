@@ -36,8 +36,8 @@ export default async function FilesPage() {
     <div className="flex flex-col gap-6">
       <PageHeader
         title="Files"
-        description="Browser-direct uploads, server-signed downloads."
-        actions={available ? <FileUploader userId={session.user.id} /> : undefined}
+        description="Browser uploads through a server route, server-signed downloads."
+        actions={available ? <FileUploader /> : undefined}
       />
       <Card>
         <CardContent className="pt-6">
