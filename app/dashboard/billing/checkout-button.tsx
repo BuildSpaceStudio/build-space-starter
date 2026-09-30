@@ -5,16 +5,29 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { openBillingPortal, startCheckout } from "./actions";
 
-export function CheckoutButton({ priceId, label }: { priceId: string; label: string }) {
+export function CheckoutButton({
+  priceId,
+  label,
+  promotionCode,
+}: {
+  priceId: string;
+  label: string;
+  promotionCode?: string;
+}) {
   const { execute, isPending } = useAction(startCheckout, {
     onSuccess: ({ data }) => {
-      if (data?.url) window.location.href = data.url;
+      if (data && "error" in data) toast.error(data.error);
+      else if (data?.url) window.location.href = data.url;
     },
     onError: ({ error }) => toast.error(error.serverError ?? "Failed to start checkout"),
   });
 
   return (
-    <Button className="w-full" disabled={isPending} onClick={() => execute({ priceId })}>
+    <Button
+      className="w-full"
+      disabled={isPending}
+      onClick={() => execute({ priceId, promotionCode })}
+    >
       {isPending ? "Redirecting…" : label}
     </Button>
   );

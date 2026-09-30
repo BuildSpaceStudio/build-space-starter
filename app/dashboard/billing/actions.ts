@@ -2,7 +2,7 @@
 
 import { headers } from "next/headers";
 import { z } from "zod";
-import { createCheckout, createPortalSession } from "@/lib/billing";
+import { createCheckout, createPortalSession, PROMO_CODE_PATTERN } from "@/lib/billing";
 import { env } from "@/lib/env";
 import { authActionClient } from "@/lib/safe-action";
 
@@ -17,17 +17,25 @@ async function getAppOrigin(): Promise<string> {
 
 // Server-side checkout is the blessed integration: the session user is bound
 // to the Stripe session here, so billing state lands on the right identity.
+// `promotionCode` comes from a `?promo=` link or the page's "Have a promo
+// code?" form. Stripe validates it; for codes meant only for certain users,
+// decide on the server who gets one instead of accepting it from the client.
 export const startCheckout = authActionClient
-  .inputSchema(z.object({ priceId: z.string().min(1).max(128) }))
+  .inputSchema(
+    z.object({
+      priceId: z.string().min(1).max(128),
+      promotionCode: z.string().trim().max(40).regex(PROMO_CODE_PATTERN).optional(),
+    }),
+  )
   .action(async ({ parsedInput, ctx }) => {
     const origin = await getAppOrigin();
-    const { url } = await createCheckout({
+    return createCheckout({
       userId: ctx.session.user.id,
       priceId: parsedInput.priceId,
+      promotionCode: parsedInput.promotionCode,
       successUrl: `${origin}/dashboard/billing?checkout=success`,
       cancelUrl: `${origin}/dashboard/billing?checkout=cancelled`,
     });
-    return { url };
   });
 
 export const openBillingPortal = authActionClient.action(async ({ ctx }) => {

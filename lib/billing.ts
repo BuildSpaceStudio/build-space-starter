@@ -48,18 +48,54 @@ export async function getBillingOverview(): Promise<BillingOverview> {
   }
 }
 
+// What customers type: codes are created with `buildspace app billing promos create`.
+export const PROMO_CODE_PATTERN = /^[A-Za-z0-9_-]{3,40}$/;
+
+// Normalizes a `?promo=` value or form input; null when absent or malformed.
+export function normalizePromoCode(raw: string | null | undefined): string | null {
+  const code = raw?.trim();
+  return code && PROMO_CODE_PATTERN.test(code) ? code.toUpperCase() : null;
+}
+
+export type CheckoutResult = { url: string } | { error: string };
+
+// `promotionCode` pre-applies a code (any price type). `allowPromotionCodes`
+// instead shows Stripe's own code field (subscription prices only). Pass one
+// or neither. A rejected code (unknown, expired, used up, wrong product) is
+// returned as `{ error }` for the UI, since a thrown message would be replaced
+// by next-safe-action's generic server error.
 export async function createCheckout({
   userId,
   priceId,
   successUrl,
   cancelUrl,
+  promotionCode,
+  allowPromotionCodes,
 }: {
   userId: string;
   priceId: string;
   successUrl: string;
   cancelUrl: string;
-}): Promise<{ url: string }> {
-  return getServerClient().billing.createCheckout({ userId, priceId, successUrl, cancelUrl });
+  promotionCode?: string;
+  allowPromotionCodes?: boolean;
+}): Promise<CheckoutResult> {
+  try {
+    const { url } = await getServerClient().billing.createCheckout({
+      userId,
+      priceId,
+      successUrl,
+      cancelUrl,
+      promotionCode,
+      allowPromotionCodes,
+    });
+    return { url };
+  } catch (err) {
+    if (promotionCode && err instanceof BuildspaceError && err.status === 400) {
+      log.warn("billing", "promotion code rejected", { status: err.status });
+      return { error: `Promo code ${promotionCode} can't be used: ${err.message}` };
+    }
+    throw err;
+  }
 }
 
 export async function createPortalSession({
