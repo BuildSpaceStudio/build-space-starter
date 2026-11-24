@@ -1,6 +1,6 @@
 # Database Setup and CRUD
 
-Every BuildSpace app gets a managed Turso (libSQL) database — one per environment. Access it directly via `@libsql/client` + Drizzle ORM (not through the BuildSpace SDK).
+BuildSpace apps use a managed Turso (libSQL) database — one per environment. Access it directly via `@libsql/client` + Drizzle ORM (not through the BuildSpace SDK). Hosted projects get it at creation; services-first projects (created with `buildspace app create --services`) provision it on demand with `buildspace app database provision`, and credentials always arrive via `buildspace env pull` for local dev (`BUILDSPACE_DB_URL` / `BUILDSPACE_DB_TOKEN`).
 
 Setup already exists in this project — extend it, don't recreate it:
 

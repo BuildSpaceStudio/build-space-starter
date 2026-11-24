@@ -1,6 +1,6 @@
 ---
 name: buildspace-cli
-description: Reference for the BuildSpace CLI. Use when deploying or promoting apps, managing environment variables, domains, billing, login page branding, or the dev preview, reading app analytics and reports, authenticating with BuildSpace, or initializing new projects from the command line.
+description: Reference for the BuildSpace CLI. Use when deploying or promoting apps, managing environment variables, domains, billing, login page branding, or the dev preview, reading app analytics and reports, authenticating with BuildSpace, initializing new projects from the command line, or starting and managing services-first projects (local development with a managed database and storage).
 ---
 
 # BuildSpace CLI
@@ -60,6 +60,34 @@ Clone a BuildSpace app repo by slug, configure git so plain `git push` works, an
 ```bash
 buildspace init <slug>
 ```
+
+Only hosted projects have a repository to clone. For a services-first project (no hosting yet), `init` fails with guidance — use `buildspace env pull --app <slug> --env dev` to connect existing local code, or `buildspace app hosting enable` to prepare the managed repository.
+
+## Services-first projects
+
+Two ways to start the same kind of project. The **default** (`buildspace app create --name "My App"`) provisions everything automatically — managed git repo, hosting, database, and storage. **Services-first** starts a project for code the creator already runs locally, with no repo or hosting at creation:
+
+```bash
+buildspace app create --name "Inventory" --services --database          # + --storage for private storage
+buildspace env pull --app inventory --env dev                           # credentials into the existing local folder
+```
+
+- Selected services finish in a short provisioning session; the create command prints them. `--database` → `BUILDSPACE_DB_URL` / `BUILDSPACE_DB_TOKEN` (use with `@libsql/client`); `--storage` → uploads/downloads through the BuildSpace server SDK with `BUILDSPACE_SECRET_KEY`.
+- Add either service to an existing project later: `buildspace app database provision` / `buildspace app storage provision` (default env dev; `--env prod` for production). Both are idempotent.
+- Keep `.env.local` out of Git.
+
+### Add hosting (two-step)
+
+`buildspace app hosting enable --app <slug> --env dev` on a services project prepares an **empty managed repository** and prints the exact push commands instead of enabling hosting:
+
+```bash
+buildspace app hosting enable --app inventory --env dev
+# Prepared an empty managed repository for inventory.
+#   git remote add buildspace https://api.buildspace.studio/inventory.git
+#   git push buildspace HEAD:refs/heads/buildspace/dev
+```
+
+After the creator pushes their code, the **same command run again** enables hosting and deploys the pushed commit. Existing development database and storage keep working throughout; production resources are configured separately.
 
 ## Ship to dev
 
@@ -150,10 +178,13 @@ Full reference: `https://docs.buildspace.studio/docs/hosting/build-config`.
 
 ```bash
 buildspace app list [--json]                  # your apps, active one marked
-buildspace app create --name "My App" --json  # returns slug, environments, keys, provisioningSession
+buildspace app create --name "My App" --json  # hosted default; returns slug, environments, keys, provisioningSession
+buildspace app create --name "My App" --services --database --storage   # services-first project
 buildspace app use <slug>                     # set the default app
 buildspace app status [--json]                # hosting, dev preview sleep state, Terms & Privacy checklist (`legal`)
 buildspace app hosting <status|enable|disable> [--env dev|prod]
+buildspace app database provision [--env dev|prod]   # add the managed Turso database for an environment
+buildspace app storage provision [--env dev|prod]   # add the private storage bucket for an environment
 buildspace app delete <slug> --yes   # or --confirm <slug>; prompts without it
 ```
 

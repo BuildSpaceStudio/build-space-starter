@@ -32,7 +32,7 @@ BUILDSPACE_DB_URL=libsql://...
 BUILDSPACE_DB_TOKEN=...
 ```
 
-`BUILDSPACE_SECRET_KEY` and `NEXT_PUBLIC_BUILDSPACE_PUBLISHABLE_KEY` come from the BuildSpace dashboard. `BUILDSPACE_DB_URL` and `BUILDSPACE_DB_TOKEN` are auto-injected into your Railway service when the app is created — you do not need to set them manually in production.
+`BUILDSPACE_SECRET_KEY` and `NEXT_PUBLIC_BUILDSPACE_PUBLISHABLE_KEY` come from the BuildSpace dashboard. `BUILDSPACE_DB_URL` and `BUILDSPACE_DB_TOKEN` are auto-injected into your Railway service when the app is created — you do not need to set them manually in production. Services-first projects (created with `buildspace app create --services`) instead provision the database on demand (`buildspace app database provision`) and get both credentials plus the secret key through `buildspace env pull --app <slug> --env dev`.
 
 Copy `.env.example` to `.env.local` and fill in keys from the BuildSpace dashboard. For local database development, you can omit the DB env vars and fall back to a local SQLite file (see Database section below).
 
@@ -266,14 +266,16 @@ await bs.billing.createCheckout({ userId, lookupKey: "lifetime", promotionCode: 
 
 ## Database
 
-Every Buildspace app gets a managed [Turso](https://turso.tech) (libSQL) database — one per environment (`dev` and `prod`). The database is **not** accessed through the Buildspace SDK; you connect directly using `@libsql/client` and optionally [Drizzle ORM](https://orm.drizzle.team).
+Every Buildspace app can have a managed [Turso](https://turso.tech) (libSQL) database — one per environment (`dev` and `prod`). The database is **not** accessed through the Buildspace SDK; you connect directly using `@libsql/client` and optionally [Drizzle ORM](https://orm.drizzle.team).
 
 ### How it works
 
-1. **Provisioning** — A Turso database is created for each environment when you create an app in Creator Studio.
-2. **Credentials** — Two env vars are injected into your Railway service automatically:
+1. **Provisioning** — Hosted creates provision a Turso database for each environment automatically. Services-first projects choose a development database at creation or add it later with `buildspace app database provision` (or the Studio Data tab); production is a separate explicit action.
+2. **Credentials** — Two env vars are attached to the environment:
    - `BUILDSPACE_DB_URL` — libSQL connection URL
    - `BUILDSPACE_DB_TOKEN` — auth token (JWT)
+
+   Hosted services receive them automatically; for local development pull them with `buildspace env pull --app <slug> --env dev`.
 3. **Connection** — Your app connects directly to Turso using `@libsql/client`. No SDK wrapper needed.
 4. **Schema ownership** — You define and manage your own tables and migrations. The platform does not inject or manage any tables.
 
